@@ -266,12 +266,27 @@ func (s *Service) Install(createWorkingDirectory bool) error {
 	return nil
 }
 
-func (s *Service) Uninstall(removeWorkingDirectory bool) {
-	s.StopService()
-	s.DisableService()
-	s.DeleteServiceFile()
-	s.ReloadDaemon()
-	s.ResetFailedServices()
-	s.DeleteExecutable()
-	s.DeleteFiles(removeWorkingDirectory)
+func (s *Service) Uninstall(removeWorkingDirectory bool) error {
+	if err := s.StopService(); err != nil {
+		return err
+	}
+	if err := s.DisableService(); err != nil {
+		return err
+	}
+	if err := s.DeleteServiceFile(); err != nil {
+		return err
+	}
+	if err := s.ReloadDaemon(); err != nil {
+		return err
+	}
+	if err := s.ResetFailedServices(); err != nil {
+		return err
+	}
+	if err := s.DeleteExecutable(); err != nil {
+		return err
+	}
+	if err := s.DeleteFiles(removeWorkingDirectory); err != nil {
+		return err
+	}
+	return nil
 }

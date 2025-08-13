@@ -59,7 +59,9 @@ func (service *Service) ParseCommand(cmd string) string {
 		panic(err)
 	}
 	var parsedCommand bytes.Buffer
-	tmpl.Execute(&parsedCommand, service.Conf)
+	if err := tmpl.Execute(&parsedCommand, service.Conf); err != nil {
+		panic(err)
+	}
 	return parsedCommand.String()
 }
 
@@ -85,7 +87,11 @@ func (service *Service) CopyFile(path, workingDirectory string) error {
 		if err != nil {
 			return err
 		}
-		defer dstFile.Close()
+		defer func() {
+			if err := dstFile.Close(); err != nil {
+				panic(err)
+			}
+		}()
 
 		_, err = dstFile.ReadFrom(srcFile)
 		return err
@@ -104,12 +110,16 @@ func (service *Service) DeleteFile(path, workingDirectory string) error {
 		if info.IsDir() {
 			directories = append(directories, remotePath)
 		} else {
-			service.client.SftClient.Remove(remotePath)
+			if err := service.client.SftClient.Remove(remotePath); err != nil {
+				return err
+			}
 		}
 		return nil
 	})
 	for i := len(directories) - 1; i >= 0; i-- {
-		service.client.SftClient.RemoveDirectory(directories[i])
+		if err := service.client.SftClient.RemoveDirectory(directories[i]); err != nil {
+			return err
+		}
 	}
 	return err
 }
@@ -130,7 +140,11 @@ func (service *Service) CopyUnitServiceFile() error {
 	if err != nil {
 		return err
 	}
-	defer dstFile.Close()
+	defer func() {
+		if err := dstFile.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
 	// write to file
 	if _, err := dstFile.ReadFrom(&buf); err != nil {
@@ -146,7 +160,9 @@ func (service *Service) GenerateServiceFile(buf io.Writer) {
 	if err != nil {
 		panic(err)
 	}
-	tmpl.Execute(buf, service.Conf)
+	if err := tmpl.Execute(buf, service.Conf); err != nil {
+		panic(err)
+	}
 }
 
 // DeleteDirIfEmpty deletes remote directory only if empty.
