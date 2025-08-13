@@ -88,9 +88,9 @@ func (s *Service) AuthPrivateRepo() error {
 func (s *Service) InstallExecutable() error {
 	var cmd string
 	if s.Conf.GoPrivate != "" {
-		cmd = s.ParseCommand("GOPRIVATE={{.GoPrivate}} {{.GoExecPath}} install {{.GoInstall}}")
+		cmd = s.ParseCommand("GOPRIVATE={{.GoPrivate}} GOBIN={{.GoBinDirectory}} {{.GoExecPath}} install {{.GoInstall}}")
 	} else {
-		cmd = s.ParseCommand("{{.GoExecPath}} install {{.GoInstall}}")
+		cmd = s.ParseCommand("GOBIN={{.GoBinDirectory}} {{.GoExecPath}} install {{.GoInstall}}")
 	}
 	errorMessage := fmt.Sprintf("cannot install the package `%s`", s.Conf.GoInstall)
 	s.runner.SendMessage(s.Name, cmd, MessageNormal)
